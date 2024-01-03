@@ -18,7 +18,7 @@ Follow these instructions to set up and run the project on your local machine. E
 ### Installation
 
 ```bash
-git clone https://github.com/khfixfastapi-chat-app.git
+git clone https://github.com/khfix/fastapi-chat-app.git
 cd fastapi-chat-app
 pip install -r requirements.txt
 
