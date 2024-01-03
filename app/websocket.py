@@ -16,6 +16,21 @@ async def websocket_endpoint(
     user_id: str = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """
+    Handle WebSocket connections for chat functionality.
+
+    Parameters:
+    - websocket (WebSocket): The WebSocket connection.
+    - room_id (str): The ID of the chat room.
+    - user_id (str): The ID of the user connecting to the WebSocket (obtained from the current user).
+    - db (Session): The database session.
+
+    Returns:
+    None
+
+    Raises:
+    None
+    """
     await manager.connect(websocket, room_id, user_id)
     try:
         while True:
@@ -38,6 +53,15 @@ async def private_message_websocket(
     current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """
+    Handle WebSocket connection for private messaging.
+
+    Args:
+        websocket (WebSocket): The WebSocket connection.
+        other_user_id (str): The ID of the other user in the private chat.
+        current_user (str, optional): The ID of the current user. Defaults to Depends(get_current_user).
+        db (Session, optional): The database session. Defaults to Depends(get_db).
+    """
     await manager.connect_private(websocket, other_user_id, current_user)
 
     try:

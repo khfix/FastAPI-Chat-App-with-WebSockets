@@ -15,15 +15,34 @@ from app.models.user import User
 router = APIRouter()
 
 
-# Function to authenticate a user
 def authenticate_user(username: str, password: str, db: Session):
+    """
+    Authenticates a user by checking if the provided username and password match the user's credentials in the database.
+
+    Args:
+        username (str): The username of the user.
+        password (str): The password of the user.
+        db (Session): The database session.
+
+    Returns:
+        User: The authenticated user if the credentials are valid, None otherwise.
+    """
     user = db.query(User).filter(User.username == username).first()
     if user and verify_password(password, user.password):
         return user
 
 
-# Function to create an access token
 def create_access_token(data: dict, expires_delta: timedelta = None):
+    """
+    Create an access token.
+
+    Args:
+        data (dict): The data to be encoded in the token.
+        expires_delta (timedelta, optional): The expiration time delta for the token. Defaults to None.
+
+    Returns:
+        str: The encoded access token.
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -34,17 +53,34 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     return encoded_jwt
 
 
-# Function to verify a password
 def verify_password(plain_password, hashed_password):
+    """
+    Verify if a plain password matches a hashed password.
+
+    Args:
+        plain_password (str): The plain password to be verified.
+        hashed_password (str): The hashed password to compare against.
+
+    Returns:
+        bool: True if the plain password matches the hashed password, False otherwise.
+    """
     return pwd_context.verify(plain_password, hashed_password)
 
 
-# Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @router.get("/protected")
 async def protected_route(current_user: str = Depends(get_current_user)):
+    """
+    Endpoint to access a protected resource.
+
+    Args:
+        current_user (str): The current user accessing the resource.
+
+    Returns:
+        dict: A dictionary containing a message confirming access to the protected resource.
+    """
     return {
         "message": f"Hello {current_user}, you have access to this protected resource"
     }
@@ -52,12 +88,21 @@ async def protected_route(current_user: str = Depends(get_current_user)):
 
 @router.post("/create_user/{username}")
 async def create_user(username: str, password: str, db: Session = Depends(get_db)):
-    # Check if the user already exists
+    """
+    Create a new user with the given username and password.
+
+    Args:
+        username (str): The username of the new user.
+        password (str): The password of the new user.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing the message "User created successfully".
+    """
     existing_user = db.query(User).filter(User.username == username).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already registered")
 
-    # Create a new user
     hashed_password = pwd_context.hash(password)
     new_user = User(username=username, password=hashed_password)
     db.add(new_user)
@@ -68,11 +113,20 @@ async def create_user(username: str, password: str, db: Session = Depends(get_db
 
 @router.delete("/delete_user/{user_id}")
 async def delete_user(user_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a user from the database.
+
+    Args:
+        user_id (int): The ID of the user to delete.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary with a message indicating the success of the operation.
+    """
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Delete the user
     db.delete(user)
     db.commit()
 
@@ -83,6 +137,16 @@ async def delete_user(user_id: int, db: Session = Depends(get_db)):
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
+    """
+    Logs in a user and returns an access token.
+
+    Args:
+        form_data (OAuth2PasswordRequestForm): The form data containing the username and password.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing the access token, token type, and user ID.
+    """
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(
@@ -91,6 +155,5 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Pass the user_id to create_access_token
     token = create_access_token(data={"sub": user.username})
     return {"access_token": token, "token_type": "bearer", "id": user.id}

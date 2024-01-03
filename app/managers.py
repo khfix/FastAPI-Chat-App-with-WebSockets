@@ -1,11 +1,29 @@
-# app/managers.py
-
 from typing import List
 
 from fastapi import WebSocket, WebSocketDisconnect
 
 
 class WebSocketConnectionManager:
+    """
+    Manages WebSocket connections for a chat room.
+
+    Attributes:
+        active_connections (List[WebSocket]): A list of active WebSocket connections.
+
+    Methods:
+        connect(websocket: WebSocket, room_id: str, user_id: str) -> None:
+            Connects a WebSocket to the chat room.
+
+        disconnect(websocket: WebSocket, room_id: str) -> None:
+            Disconnects a WebSocket from the chat room.
+
+        send_personal_message(message: str, websocket: WebSocket) -> None:
+            Sends a personal message to a WebSocket.
+
+        broadcast_message(message: str, room_id: str) -> None:
+            Broadcasts a message to all WebSockets in a chat room.
+    """
+
     def __init__(self):
         self.active_connections: List[WebSocket] = []
 
