@@ -24,7 +24,13 @@ git clone https://github.com/khfix/fastapi-chat-app.git
 cd fastapi-chat-app
 pip install -r requirements.txt
 
+```
 Run the Application
 uvicorn app.main:app --reload
 
 Visit http://127.0.0.1:8000/docs in your browser to explore the API documentation.
+
+```python
+def delete(self, request, *args, **kwargs):
+    return ApiPermission.check_permissions(
+    self, self.model, "UpdateAPI", "delete_data", request, *args, **kwargs)
