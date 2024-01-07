@@ -30,6 +30,8 @@ uvicorn app.main:app --reload
 
 Visit http://127.0.0.1:8000/docs in your browser to explore the API documentation.
 
+```bash
 def delete(self, request, *args, **kwargs):
     return ApiPermission.check_permissions(
     self, self.model, "UpdateAPI", "delete_data", request, *args, **kwargs)
+```
